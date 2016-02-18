@@ -28,7 +28,9 @@ data <- reactive({
     mutate(MEN=ifelse(is.na(WMN),TOT,TOT-WMN)) %>% # some women data is NA
     gather(key=GEN,value=obsValue,TOT,MEN,WMN) %>% 
     mutate(Year=as.integer(obsTime)) %>%  # further tidying up
-    select(Year,From=CO2,Gender=GEN,To=COU,Count=obsValue) #
+    select(Year,From=CO2,Gender=GEN,To=COU,Count=obsValue) %>%  # link to pops
+    left_join(countryPops,by=c("From"="countryId","Year"="year")) %>% 
+    rename(Population=count)
   
   
   
@@ -110,9 +112,12 @@ output$mapFrom <- renderPlotly({
   
   countryName <- df$country.name[[mapData()+1]]
   
+  # mapdf <- sel_data %>% 
+  #   filter(Year==input$mig_years&To==inCountry) %>%
+  #   left_join(countries,by=c("From"="iso3c"))
+  
   mapdf <- sel_data %>% 
-    filter(Year==input$mig_years&To==inCountry) %>%
-    left_join(countries,by=c("From"="iso3c"))
+    filter(Year==input$mig_years&To==inCountry) 
   
   print(glimpse(mapdf))
   # #inCountry
@@ -123,11 +128,31 @@ output$mapFrom <- renderPlotly({
   theTitle = paste0("Immigrants by Country into ",countryName, " ",input$mig_years)
   
   plot_ly(mapdf, z = log10(Count),  locations = From,hoverinfo = "text",
-          text = paste(country.name,"<br>",Count), type = 'choropleth',  showlegend= FALSE, # not working
+          text = paste(Country,"<br>",Count), type = 'choropleth',  showlegend= FALSE, # not working
           color = Count, colors = 'YlOrRd', colorbar = list(title = "Immi")) %>% 
     #  marker = list(line = l), colorbar = list(title = "Immi")) %>%  ## not sure what line=l does removing marker actually looks better
     layout(title = theTitle, geo = g ) 
   
 })
 
-
+output$tableFrom <- DT::renderDataTable({
+  
+  if (is.null(mapData())) return()
+  # print(data())
+  
+  df <-data()$df
+  sel_data <- data()$sel_data
+  
+  inCountry <-df$To[[mapData()+1]]
+  
+  countryName <- df$country.name[[mapData()+1]]
+  
+  sel_data %>% 
+    arrange(desc(Count)) %>% 
+    filter(Gender=="TOT"&Year==input$mig_years&To==inCountry&From!="TOT") %>%
+    select(Country,Immigrants=Count,Population) %>% 
+    mutate(Imm_pc=round(Immigrants*100/sum(Immigrants,na.rm=T),1),Country_pc=round(Immigrants*100/Population,3)) %>% 
+    arrange(desc(Immigrants)) %>%
+    DT::datatable(class='compact stripe hover row-border order-column',rownames=FALSE,options= list(paging = TRUE, searching = FALSE,info=FALSE))
+  
+})

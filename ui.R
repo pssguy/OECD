@@ -48,7 +48,8 @@ tags$body(
                    box(width=12,
                        status = "success",solidHeader = FALSE,
                        footer="Hover for Details.",
-                       plotlyOutput('mapFrom'))
+                       plotlyOutput('mapFrom')),
+                   box(width=12,DT::dataTableOutput('tableFrom'))
             )
             )
             

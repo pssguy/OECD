@@ -26,6 +26,11 @@ library(tidyr)
 ## 
 countries <- countrycode_data
 
+## population  Data #http://data.worldbank.org/indicator/SP.POP.TOTL?page=6
+
+countryPops <- read_csv("data/countryPops.csv")
+glimpse(countryPops)
+
 # migration 2000-2013 - might want to switxch to just migration code
 #migration_df <- readRDS("data/migration.rds")
 migration_df <- readRDS("data/totalMIG.rds") # swift enough to be a shiny
