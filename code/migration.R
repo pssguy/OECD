@@ -49,7 +49,7 @@ data <- reactive({
   #   summarize(Total=sum(Count,na.rm=T)) %>% 
   #   left_join(countries,by=c("To"="iso3c"))
   # 
-   print(glimpse(byYear))
+ #  print(glimpse(byYear))
   
   
   info=list(df=byYear,sel_data=sel_data)
@@ -111,9 +111,10 @@ output$mapFrom <- renderPlotly({
   countryName <- df$country.name[[mapData()+1]]
   
   mapdf <- sel_data %>% 
-    filter(Year==input$mig_years&To==inCountry)
-  # 
-  # print(glimpse(df))
+    filter(Year==input$mig_years&To==inCountry) %>%
+    left_join(countries,by=c("From"="iso3c"))
+  
+  print(glimpse(mapdf))
   # #inCountry
   # 
   # print(df$Count)
@@ -122,7 +123,7 @@ output$mapFrom <- renderPlotly({
   theTitle = paste0("Immigrants by Country into ",countryName, " ",input$mig_years)
   
   plot_ly(mapdf, z = log10(Count),  locations = From,hoverinfo = "text",
-          text = paste(From,"<br>",Count), type = 'choropleth',  showlegend= FALSE, # not working
+          text = paste(country.name,"<br>",Count), type = 'choropleth',  showlegend= FALSE, # not working
           color = Count, colors = 'YlOrRd', colorbar = list(title = "Immi")) %>% 
     #  marker = list(line = l), colorbar = list(title = "Immi")) %>%  ## not sure what line=l does removing marker actually looks better
     layout(title = theTitle, geo = g ) 
