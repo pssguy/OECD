@@ -36,8 +36,20 @@ tags$body(
   dashboardBody(
     tabItems(
     tabItem("migration",
-            plotlyOutput('mapTo'),
-            plotlyOutput('mapFrom')
+            fluidRow(
+              column(width=6,
+                     box(width=12,
+                     status = "success",solidHeader = FALSE,
+                     footer="Hover for Details. Click Country for Source Map",
+            plotlyOutput('mapTo'))
+            ),
+            column(width=6,
+                   box(width=12,
+                       status = "success",solidHeader = FALSE,
+                       footer="Hover for Details.",
+                       plotlyOutput('mapFrom'))
+            )
+            )
             
     )#,
   #  tabItem("info", includeMarkdown("info.md"))
