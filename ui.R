@@ -41,7 +41,8 @@ tags$body(
                      box(width=12,
                      status = "success",solidHeader = FALSE,
                      footer="Hover for Details. Click Country for Source Map",
-            plotlyOutput('mapTo'))
+            plotlyOutput('mapTo')),
+            box(width=12,DT::dataTableOutput('tableTo'))
             ),
             column(width=6,
                    box(width=12,

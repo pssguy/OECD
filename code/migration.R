@@ -33,23 +33,42 @@ data <- reactive({
   
   
   
-  allImmsbyCountry2000 <-sel_data %>% 
-    tbl_df() %>% 
-    filter(Gender=="TOT"&Year==input$mig_years) %>% 
-    group_by(To) %>% 
-    summarize(Total=sum(Count,na.rm=T))
-  
-  
-  allImmsbyCountry2000 <- allImmsbyCountry2000 %>% 
+  byYear <-sel_data %>%
+    tbl_df() %>%
+    filter(Gender=="TOT"&Year==input$mig_years) %>%
+    group_by(To) %>%
+    summarize(Total=sum(Count,na.rm=T)) %>%
     left_join(countries,by=c("To"="iso3c"))
+
+  #allImmsbyCountry2000$hover <- with(allImmsbyCountry2000, paste(country.name, '<br>', "Immigrants", Total))
   
-  allImmsbyCountry2000$hover <- with(allImmsbyCountry2000, paste(country.name, '<br>', "Immigrants", Total))
+  # byYear <-sel_data %>% 
+  #   tbl_df() %>% 
+  #   filter(Gender=="TOT"&Year==input$mig_years) %>% 
+  #   group_by(To) %>% 
+  #   summarize(Total=sum(Count,na.rm=T)) %>% 
+  #   left_join(countries,by=c("To"="iso3c"))
+  # 
+   print(glimpse(byYear))
   
-  info=list(df=allImmsbyCountry2000,sel_data=sel_data)
+  
+  info=list(df=byYear,sel_data=sel_data)
   return(info)
   
 })
 
+
+output$tableTo <- DT::renderDataTable({
+  
+  
+data()$df %>% 
+  arrange(desc(Total)) %>% 
+  select(Country=country.name,Immigrants=Total) %>% 
+    mutate(OECD_pc=round(Immigrants*100/sum(Immigrants,na.rm=T),1)) %>% 
+  arrange(desc(Immigrants)) %>%
+  DT::datatable(class='compact stripe hover row-border order-column',rownames=FALSE,options= list(paging = TRUE, searching = FALSE,info=FALSE))
+  
+})
 
 output$mapTo <- renderPlotly({
   
