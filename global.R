@@ -11,6 +11,7 @@ library(plotly)
 #library(crosstalk)
 library(countrycode)
 library(tidyr)
+library(DT)
 
 # 
 # library(readr)
@@ -36,8 +37,8 @@ glimpse(countryPops)
 migration_df <- readRDS("data/totalMIG.rds") # swift enough to be a shiny
 migration_cats <- read_csv("data/categoriesMIG.csv")
 
-migCats <- migration_cats$id
-names(migCats) <- migration_cats$label
+migCats <- migration_cats$id[1]
+names(migCats) <- migration_cats$label[1]
 
 minYear <- as.integer(min(migration_df$obsTime))
 maxYear <- as.integer(max(migration_df$obsTime))

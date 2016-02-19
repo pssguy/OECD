@@ -36,8 +36,8 @@ data <- reactive({
   
   
   byYear <-sel_data %>%
-    tbl_df() %>%
-    filter(Gender=="TOT"&Year==input$mig_years) %>%
+   # tbl_df() %>%
+    filter(Gender=="TOT"&Year==input$mig_years&From!="TOT") %>% ## avoid double counting
     group_by(To) %>%
     summarize(Total=sum(Count,na.rm=T)) %>%
     left_join(countries,by=c("To"="iso3c"))
@@ -68,7 +68,9 @@ data()$df %>%
   select(Country=country.name,Immigrants=Total) %>% 
     mutate(OECD_pc=round(Immigrants*100/sum(Immigrants,na.rm=T),1)) %>% 
   arrange(desc(Immigrants)) %>%
-  DT::datatable(class='compact stripe hover row-border order-column',rownames=FALSE,options= list(paging = TRUE, searching = FALSE,info=FALSE))
+  DT::datatable(class='compact stripe hover row-border order-column',rownames=FALSE,options= list(paging = TRUE, searching = FALSE,info=FALSE)) %>% 
+    formatCurrency(c('Immigrants'), digits=0,currency="")# %>% 
+   # formatPercentage('Share', digits=1)
   
 })
 
@@ -82,7 +84,7 @@ output$mapTo <- renderPlotly({
   plot_ly(data()$df, z = log10(Total),  locations = To, hoverinfo = "text",
           text = paste(country.name,"<br>",Total),
           type = 'choropleth',  ##To is abbrev eg CAN
-          color = Total, colors = 'Greens', showlegend = FALSE,
+          color = Total, colors = 'BuGn', showlegend = FALSE, source="mapTo",
           colorbar = list(title = "Immigrants")) %>% #marker = list(line = l),
     layout(title = theTitle, geo = g)
   
@@ -92,7 +94,7 @@ mapData <- reactive({
   
   
   
-  s <- event_data("plotly_click")
+  s <- event_data("plotly_click", source="mapTo")
   
   
   
@@ -102,6 +104,8 @@ mapData <- reactive({
 
 output$mapFrom <- renderPlotly({
   
+  print("mapdata")
+  print(mapData())
   if (is.null(mapData())) return()
   # print(data())
   
@@ -153,6 +157,7 @@ output$tableFrom <- DT::renderDataTable({
     select(Country,Immigrants=Count,Population) %>% 
     mutate(Imm_pc=round(Immigrants*100/sum(Immigrants,na.rm=T),1),Country_pc=round(Immigrants*100/Population,3)) %>% 
     arrange(desc(Immigrants)) %>%
-    DT::datatable(class='compact stripe hover row-border order-column',rownames=FALSE,options= list(paging = TRUE, searching = FALSE,info=FALSE))
+    DT::datatable(class='compact stripe hover row-border order-column',rownames=FALSE,options= list(paging = TRUE, searching = FALSE,info=FALSE))  %>% 
+    formatCurrency(c('Immigrants','Population'), digits=0,currency="") 
   
 })
