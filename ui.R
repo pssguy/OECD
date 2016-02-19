@@ -42,7 +42,9 @@ tags$body(
                      status = "success",solidHeader = FALSE,
                      footer="Hover for Details. Click Country for Source Map",
             plotlyOutput('mapTo')),
-            box(width=12,DT::dataTableOutput('tableTo'))
+            box(width=12,
+                footer="Totals are sum of Individual Countries and may not match published Total Immigration",
+                DT::dataTableOutput('tableTo'))
             ),
             column(width=6,
                    box(width=12,

@@ -30,9 +30,12 @@ data <- reactive({
     mutate(Year=as.integer(obsTime)) %>%  # further tidying up
     select(Year,From=CO2,Gender=GEN,To=COU,Count=obsValue) %>%  # link to pops
     left_join(countryPops,by=c("From"="countryId","Year"="year")) %>% 
-    rename(Population=count)
+   rename(Population=count)
   
+  print("glimpse(sel_data)")
+  print(glimpse(sel_data))
   
+ # sel_data$Year <- input$mig_years
   
   
   byYear <-sel_data %>%
@@ -40,7 +43,8 @@ data <- reactive({
     filter(Gender=="TOT"&Year==input$mig_years&From!="TOT") %>% ## avoid double counting
     group_by(To) %>%
     summarize(Total=sum(Count,na.rm=T)) %>%
-    left_join(countries,by=c("To"="iso3c"))
+    left_join(countries,by=c("To"="iso3c")) %>% 
+    select(To,Total,country.name) 
 
   #allImmsbyCountry2000$hover <- with(allImmsbyCountry2000, paste(country.name, '<br>', "Immigrants", Total))
   
@@ -51,7 +55,8 @@ data <- reactive({
   #   summarize(Total=sum(Count,na.rm=T)) %>% 
   #   left_join(countries,by=c("To"="iso3c"))
   # 
- #  print(glimpse(byYear))
+  print("glimpse(byYear)")
+    print(glimpse(byYear))
   
   
   info=list(df=byYear,sel_data=sel_data)
@@ -62,15 +67,25 @@ data <- reactive({
 
 output$tableTo <- DT::renderDataTable({
   
+  data()$df %>% 
+    mutate(Year=input$mig_years) %>% 
+    left_join(countryPops,by=c("To"="countryId","Year"="year")) %>% 
+    arrange(desc(Total)) %>% 
+    select(Country,Immigrants=Total,Population=count) %>% 
+    #  select(Country=country.name,Immigrants=Total) %>% 
+    mutate(OECD_pc=round(Immigrants*100/sum(Immigrants,na.rm=T),1),Country_pc=round(Immigrants*100/Population,1)) %>% 
+    arrange(desc(Immigrants)) %>%
+    DT::datatable(class='compact stripe hover row-border order-column',rownames=FALSE,options= list(paging = TRUE, searching = FALSE,info=FALSE)) %>% 
+    formatCurrency(c('Immigrants','Population'), digits=0,currency="")
   
-data()$df %>% 
-  arrange(desc(Total)) %>% 
-  select(Country=country.name,Immigrants=Total) %>% 
-    mutate(OECD_pc=round(Immigrants*100/sum(Immigrants,na.rm=T),1)) %>% 
-  arrange(desc(Immigrants)) %>%
-  DT::datatable(class='compact stripe hover row-border order-column',rownames=FALSE,options= list(paging = TRUE, searching = FALSE,info=FALSE)) %>% 
-    formatCurrency(c('Immigrants'), digits=0,currency="")# %>% 
-   # formatPercentage('Share', digits=1)
+# data()$df %>% 
+#   arrange(desc(Total)) %>% 
+#   select(Country=country.name,Immigrants=Total) %>% 
+#     mutate(OECD_pc=round(Immigrants*100/sum(Immigrants,na.rm=T),1)) %>% 
+#   arrange(desc(Immigrants)) %>%
+#   DT::datatable(class='compact stripe hover row-border order-column',rownames=FALSE,options= list(paging = TRUE, searching = FALSE,info=FALSE)) %>% 
+#     formatCurrency(c('Immigrants'), digits=0,currency="")# %>% 
+#    # formatPercentage('Share', digits=1)
   
 })
 
