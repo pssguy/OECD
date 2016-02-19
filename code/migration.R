@@ -83,7 +83,7 @@ output$mapTo <- renderPlotly({
   
   plot_ly(data()$df, z = log10(Total),  locations = To, hoverinfo = "text",
           text = paste(country.name,"<br>",Total),
-          type = 'choropleth',  ##To is abbrev eg CAN
+          type = 'choropleth',  showscale=FALSE,##To is abbrev eg CAN
           color = Total, colors = 'BuGn', showlegend = FALSE, source="mapTo",
           colorbar = list(title = "Immigrants")) %>% #marker = list(line = l),
     layout(title = theTitle, geo = g)
@@ -132,7 +132,7 @@ output$mapFrom <- renderPlotly({
   theTitle = paste0("Immigrants by Country into ",countryName, " ",input$mig_years)
   
   plot_ly(mapdf, z = log10(Count),  locations = From,hoverinfo = "text",
-          text = paste(Country,"<br>",Count), type = 'choropleth',  showlegend= FALSE, # not working
+          text = paste(Country,"<br>",Count), type = 'choropleth',showscale= FALSE,
           color = Count, colors = 'YlOrRd', colorbar = list(title = "Immi")) %>% 
     #  marker = list(line = l), colorbar = list(title = "Immi")) %>%  ## not sure what line=l does removing marker actually looks better
     layout(title = theTitle, geo = g ) 
